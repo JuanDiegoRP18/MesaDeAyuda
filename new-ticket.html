@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Nuevo Ticket</title>
+    <link rel="stylesheet" href="public/css/lib/bootstrap/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #fffffe, #43a0ce);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ticket-form-box {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            padding: 40px 35px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .ticket-form-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4358ce;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #333;
+        }
+        .btn-ticket {
+            background: linear-gradient(90deg, #439bce, #185a9d);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+        }
+        .btn-ticket:hover {
+            background: linear-gradient(90deg, #185a9d, #43b0ce);
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-form-box">
+        <div class="ticket-form-title">Crear Nuevo Ticket</div>
+        <form action="controllers/new-ticket.php" method="POST">
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" maxlength="100" required>
+            </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" maxlength="255" rows="4" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" required>
+            </div>
+            <div class="mb-3">
+                <label for="prioridad" class="form-label">Prioridad</label>
+                <select class="form-control" id="prioridad" name="prioridad" required>
+                    <option value="">Selecciona prioridad</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="departamento" class="form-label">Departamento</label>
+                <select class="form-control" id="departamento" name="departamento" required>
+                    <option value="">Selecciona departamento</option>
+                    <option value="1">Recursos Humanos</option>
+                    <option value="2">Finanzas</option>
+                    <option value="3">Tecnología</option>
+                    <option value="4">Ventas</option>
+                    <option value="5">Marketing</option>
+                    <option value="6">Operaciones</option>
+                    <option value="7">Atención al Cliente</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-control" id="estado" name="estado" required>
+                    <option value="">Selecciona estado</option>
+                    <option value="Abierto">Abierto</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Cerrado">Cerrado</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-ticket w-100 mt-3">Enviar Ticket</button>
+        </form>
+    </div>
+</body>
+</html>
