@@ -1,27 +1,66 @@
-name: CI - PHP
+<?php
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+class Workflow {
+    private $estado;
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    public function __construct($estadoInicial = 'pendiente') {
+        $this->estado = $estadoInicial;
+    }
 
-    steps:
-      - name: Checkout del repositorio
-        uses: actions/checkout@v3
+    public function avanzar($accion) {
+        $transiciones = [
+            'pendiente' => [
+                'aprobar' => 'aprobado',
+                'rechazar' => 'rechazado',
+            ]
+        ];
 
-      - name: Configurar PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
+        if (isset($transiciones[$this->estado][$accion])) {
+            $this->estado = $transiciones[$this->estado][$accion];
+            $this->ejecutarPipeline($accion);
+            return true;
+        }
 
-      - name: Instalar dependencias
-        run: composer install --no-progress --no-suggest --prefer-dist
+        return false;
+    }
 
-      - name: Ejecutar pruebas
-        run: vendor/bin/phpunit --testdox
+    private function ejecutarPipeline($accion) {
+        $pipeline = new Pipeline();
 
+        if ($accion === 'aprobar') {
+            $pipeline
+                ->pipe(fn($data) => strtoupper($data))
+                ->pipe(fn($data) => "Documento aprobado: " . $data);
+        } elseif ($accion === 'rechazar') {
+            $pipeline
+                ->pipe(fn($data) => strtolower($data))
+                ->pipe(fn($data) => "Documento rechazado: " . $data);
+        }
+
+        echo $pipeline->process("Ejemplo de documento") . "\n";
+    }
+
+    public function getEstado() {
+        return $this->estado;
+    }
+}
+
+class Pipeline {
+    private $stages = [];
+
+    public function pipe(callable $stage) {
+        $this->stages[] = $stage;
+        return $this;
+    }
+
+    public function process($payload) {
+        foreach ($this->stages as $stage) {
+            $payload = $stage($payload);
+        }
+        return $payload;
+    }
+}
+
+// Ejecución
+$workflow = new Workflow();
+$workflow->avanzar('aprobar');
