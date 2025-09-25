@@ -1,66 +1,61 @@
 <?php
 
 class Workflow {
-    private $estado;
-
-    public function __construct($estadoInicial = 'pendiente') {
-        $this->estado = $estadoInicial;
+    private $steps = [];
+    
+    // Añadir paso al workflow
+    public function addStep(callable $step) {
+        $this->steps[] = $step;
     }
 
-    public function avanzar($accion) {
-        $transiciones = [
-            'pendiente' => [
-                'aprobar' => 'aprobado',
-                'rechazar' => 'rechazado',
-            ]
-        ];
-
-        if (isset($transiciones[$this->estado][$accion])) {
-            $this->estado = $transiciones[$this->estado][$accion];
-            $this->ejecutarPipeline($accion);
-            return true;
+    // Ejecutar el flujo completo
+    public function run($data) {
+        foreach ($this->steps as $step) {
+            $data = $step($data); // cada paso puede modificar los datos
         }
-
-        return false;
-    }
-
-    private function ejecutarPipeline($accion) {
-        $pipeline = new Pipeline();
-
-        if ($accion === 'aprobar') {
-            $pipeline
-                ->pipe(fn($data) => strtoupper($data))
-                ->pipe(fn($data) => "Documento aprobado: " . $data);
-        } elseif ($accion === 'rechazar') {
-            $pipeline
-                ->pipe(fn($data) => strtolower($data))
-                ->pipe(fn($data) => "Documento rechazado: " . $data);
-        }
-
-        echo $pipeline->process("Ejemplo de documento") . "\n";
-    }
-
-    public function getEstado() {
-        return $this->estado;
+        return $data;
     }
 }
 
-class Pipeline {
-    private $stages = [];
+// Ejemplo de pasos ---------------------
 
-    public function pipe(callable $stage) {
-        $this->stages[] = $stage;
-        return $this;
+// 1. Validar datos
+$validar = function($data) {
+    if (empty($data['nombre'])) {
+        throw new Exception("El nombre es obligatorio");
     }
+    return $data;
+};
 
-    public function process($payload) {
-        foreach ($this->stages as $stage) {
-            $payload = $stage($payload);
-        }
-        return $payload;
-    }
+// 2. Procesar (ejemplo: poner en mayúsculas)
+$procesar = function($data) {
+    $data['nombre'] = strtoupper($data['nombre']);
+    return $data;
+};
+
+// 3. Notificar (ejemplo: log simple)
+$notificar = function($data) {
+    echo "Notificación: Se procesó el usuario {$data['nombre']}\n";
+    return $data;
+};
+
+// ---------------------
+// Uso del workflow
+// ---------------------
+
+try {
+    $workflow = new Workflow();
+    $workflow->addStep($validar);
+    $workflow->addStep($procesar);
+    $workflow->addStep($notificar);
+
+    $resultado = $workflow->run([
+        "nombre" => "Carlos"
+    ]);
+
+    print_r($resultado);
+
+} catch (Exception $e) {
+    echo "Error en el workflow: " . $e->getMessage();
 }
 
-// Ejecución
-$workflow = new Workflow();
-$workflow->avanzar('aprobar');
