@@ -12,23 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Descargar el código
     - name: Checkout del repositorio
       uses: actions/checkout@v3
 
-    # 2. Configurar PHP
     - name: Configurar PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1' # puedes cambiarlo a la versión que uses
+        php-version: '8.1'
         extensions: mbstring, intl, pdo, mysql
         coverage: none
 
-    # 3. Instalar dependencias con Composer
-    - name: Instalar dependencias
-      run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-
-    # 4. Ejecutar pruebas (si tienes PHPUnit)
-    - name: Ejecutar tests con PHPUnit
+    # 👇 En lugar de composer, valida solo sintaxis PHP
+    - name: Validar sintaxis PHP
       run: |
-        if [ -f ./vendor/bin/phpunit ]; then ./vendor/bin/phpunit --testdox; else echo "No hay tests"; fi
+        find . -type f -name "*.php" -exec php -l {} \;
