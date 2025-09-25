@@ -1,61 +1,34 @@
-<?php
+name: CI - PHP CRUD
 
-class Workflow {
-    private $steps = [];
-    
-    // Añadir paso al workflow
-    public function addStep(callable $step) {
-        $this->steps[] = $step;
-    }
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-    // Ejecutar el flujo completo
-    public function run($data) {
-        foreach ($this->steps as $step) {
-            $data = $step($data); // cada paso puede modificar los datos
-        }
-        return $data;
-    }
-}
+jobs:
+  build:
 
-// Ejemplo de pasos ---------------------
+    runs-on: ubuntu-latest
 
-// 1. Validar datos
-$validar = function($data) {
-    if (empty($data['nombre'])) {
-        throw new Exception("El nombre es obligatorio");
-    }
-    return $data;
-};
+    steps:
+    # 1. Descargar el código
+    - name: Checkout del repositorio
+      uses: actions/checkout@v3
 
-// 2. Procesar (ejemplo: poner en mayúsculas)
-$procesar = function($data) {
-    $data['nombre'] = strtoupper($data['nombre']);
-    return $data;
-};
+    # 2. Configurar PHP
+    - name: Configurar PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1' # puedes cambiarlo a la versión que uses
+        extensions: mbstring, intl, pdo, mysql
+        coverage: none
 
-// 3. Notificar (ejemplo: log simple)
-$notificar = function($data) {
-    echo "Notificación: Se procesó el usuario {$data['nombre']}\n";
-    return $data;
-};
+    # 3. Instalar dependencias con Composer
+    - name: Instalar dependencias
+      run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
 
-// ---------------------
-// Uso del workflow
-// ---------------------
-
-try {
-    $workflow = new Workflow();
-    $workflow->addStep($validar);
-    $workflow->addStep($procesar);
-    $workflow->addStep($notificar);
-
-    $resultado = $workflow->run([
-        "nombre" => "Carlos"
-    ]);
-
-    print_r($resultado);
-
-} catch (Exception $e) {
-    echo "Error en el workflow: " . $e->getMessage();
-}
-
+    # 4. Ejecutar pruebas (si tienes PHPUnit)
+    - name: Ejecutar tests con PHPUnit
+      run: |
+        if [ -f ./vendor/bin/phpunit ]; then ./vendor/bin/phpunit --testdox; else echo "No hay tests"; fi
